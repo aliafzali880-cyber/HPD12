@@ -1,234 +1,284 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
-
+/* =========================================================
+   متغیرهای رنگ و تنظیمات اصلی (برای تغییر راحت تم)
+   ========================================================= */
 :root {
-  --navy: #07152f;
-  --blue: #0e3a70;
-  --cyan: #70d7ff;
-  --text: #f5f9ff;
-  --muted: #b8cbe6;
-  --glass: rgba(9, 27, 57, 0.64);
-  --line: rgba(188, 221, 255, 0.17);
+  /* گرادیانت پس‌زمینه */
+  --bg-1: #0a1f44;
+  --bg-2: #1e6fd9;
+  --bg-3: #5fb8ff;
+
+  /* رنگ‌های کارت شیشه‌ای */
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 12px 40px rgba(5, 20, 60, 0.45);
+
+  /* متن و تاکید */
+  --text: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.85);
+  --accent: #ffd166;
+  --accent-2: #ff7eb6;
+
+  /* ابعاد */
+  --radius: 24px;
+  --gap: 40px;
+  --font: "Vazirmatn", "Vazir", Tahoma, "Segoe UI", sans-serif;
 }
 
-* { box-sizing: border-box; }
+/* =========================================================
+   ریست ساده
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { min-height: 100%; }
+html { scroll-behavior: smooth; }
 
 body {
-  margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
+  font-family: var(--font);
   color: var(--text);
-  font-family: "Vazirmatn", Tahoma, sans-serif;
+  overflow-x: hidden;
+  /* گرادیانت اصلی + نور محو برای عمق */
   background:
-    radial-gradient(ellipse at 15% 12%, rgba(37, 126, 218, .42), transparent 42%),
-    radial-gradient(ellipse at 88% 78%, rgba(25, 102, 174, .35), transparent 38%),
-    linear-gradient(135deg, #061126 0%, #0a2850 48%, #12659a 100%);
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.18), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(95, 184, 255, 0.35), transparent 50%),
+    linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
   background-attachment: fixed;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: .18;
-  background-image: radial-gradient(rgba(255,255,255,.75) .7px, transparent .7px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
-}
-
-#celebration-canvas {
+/* =========================================================
+   لایه‌های افکت (کانواس‌ها و بادکنک‌ها)
+   ========================================================= */
+#sparkle-canvas,
+#confetti-canvas {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 5;
 }
+#sparkle-canvas { z-index: 0; }
+#confetti-canvas { z-index: 50; }
 
-.ambient {
+.balloons {
   position: fixed;
-  border-radius: 50%;
-  filter: blur(2px);
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
-  animation: float 12s ease-in-out infinite alternate;
-}
-.ambient-one {
-  width: 280px; height: 280px;
-  top: 8%; right: -140px;
-  background: rgba(72, 183, 255, .12);
-}
-.ambient-two {
-  width: 220px; height: 220px;
-  bottom: 5%; left: -100px;
-  background: rgba(120, 113, 255, .12);
-  animation-delay: -4s;
-}
-
-.page {
-  width: min(760px, calc(100% - 32px));
-  margin: 0 auto;
-  padding: 58px 0 28px;
-  position: relative;
   z-index: 1;
 }
 
-.hero { text-align: center; margin-bottom: 34px; }
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 15px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255,255,255,.055);
-  color: #d4eaff;
-  font-size: 12px;
-  letter-spacing: .2px;
-  backdrop-filter: blur(12px);
-}
-.eyebrow-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #79e0ff;
-  box-shadow: 0 0 14px #79e0ff;
+.balloon {
+  position: absolute;
+  bottom: -160px;
+  width: var(--size);
+  height: calc(var(--size) * 1.25);
+  background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.7), var(--color) 45%);
+  border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
+  opacity: 0.85;
+  box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.15);
+  animation: balloon-rise var(--duration) linear var(--delay) infinite;
 }
 
-h1 {
-  margin: 18px 0 8px;
-  font-size: clamp(38px, 7vw, 62px);
-  line-height: 1.25;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  text-shadow: 0 8px 35px rgba(0,0,0,.22);
-}
-h1 span {
-  color: #8be3ff;
-  text-shadow: 0 0 28px rgba(92, 206, 255, .35);
-}
-.subtitle {
-  margin: 0 auto;
-  max-width: 480px;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 2;
-}
-
-.glass-card {
-  border: 1px solid var(--line);
-  border-radius: 25px;
-  background: linear-gradient(145deg, rgba(15, 41, 77, .82), rgba(5, 20, 45, .76));
-  box-shadow: 0 22px 65px rgba(0, 8, 25, .24), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  padding: clamp(18px, 4vw, 28px);
-  position: relative;
-  overflow: hidden;
-  animation: card-enter .8s both;
-}
-.glass-card::before {
+/* گره و نخ بادکنک */
+.balloon::before {
   content: "";
   position: absolute;
-  top: 0; right: 9%;
-  width: 150px; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(135,220,255,.8), transparent);
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--color);
+  border-top: 0;
 }
-.video-card { margin-top: 24px; animation-delay: .12s; }
+.balloon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.5);
+}
 
-.card-heading {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 22px;
+@keyframes balloon-rise {
+  0%   { transform: translateY(0) translateX(0) rotate(-3deg); }
+  25%  { transform: translateY(-30vh) translateX(18px) rotate(3deg); }
+  50%  { transform: translateY(-65vh) translateX(-18px) rotate(-3deg); }
+  75%  { transform: translateY(-100vh) translateX(18px) rotate(3deg); }
+  100% { transform: translateY(-140vh) translateX(0) rotate(-3deg); }
 }
-.heading-icon {
-  flex: 0 0 44px;
-  width: 44px; height: 44px;
-  display: grid; place-items: center;
-  border-radius: 14px;
-  color: #9de8ff;
-  font-size: 20px;
-  background: linear-gradient(145deg, rgba(86, 190, 255, .2), rgba(100, 112, 255, .12));
-  border: 1px solid rgba(151, 220, 255, .2);
-}
-.card-heading h2 { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
-.card-heading p { margin: 0; color: #9eb8d9; font-size: 12px; }
 
-.message-content {
-  min-height: 190px;
-  padding: 19px 20px;
-  border-radius: 17px;
-  border: 1px solid rgba(164, 208, 255, .13);
-  background: rgba(2, 13, 32, .32);
+/* =========================================================
+   چیدمان صفحه
+   ========================================================= */
+.page {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 18px 60px;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--gap);
 }
-.message-content p {
-  margin: 0;
+
+/* =========================================================
+   کارت شیشه‌ای (مشترک)
+   ========================================================= */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  padding: 24px;
+}
+
+/* =========================================================
+   باکس متن
+   ========================================================= */
+.birthday-title {
+  text-align: center;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 800;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, var(--accent), #fff, var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 30px rgba(255, 209, 102, 0.25);
+}
+
+.text-card { min-height: 250px; }
+
+.text-card__input {
   width: 100%;
-  color: #e0ecfb;
-  font-size: 14px;
-  line-height: 2.35;
-  white-space: pre-line;
+  min-height: 190px; /* حدود ۷ خط متن */
+  resize: vertical;
+  font-family: var(--font);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
-.card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #8faed3;
-  font-size: 11px;
-  margin-top: 16px;
+.text-card__input::placeholder { color: var(--text-soft); }
+.text-card__input:focus {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.25);
 }
-.sparkle { color: #8de5ff; font-size: 18px; }
 
-.video-frame {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 17px;
-  background: #020916;
-  border: 1px solid rgba(164, 208, 255, .18);
-  box-shadow: 0 12px 35px rgba(0,0,0,.24);
-}
-.video-frame video {
+/* =========================================================
+   باکس ویدئو
+   ========================================================= */
+.video-card { padding: 16px; }
+
+.video-card__player {
   display: block;
   width: 100%;
-  max-height: 540px;
-  aspect-ratio: 16 / 9;
-  object-fit: contain;
-  background: #020916;
+  border-radius: 16px;
+  background: rgba(5, 15, 40, 0.6);
+  accent-color: var(--accent); /* رنگ نوار کنترل‌ها */
 }
-.video-note {
-  margin: 13px 0 0;
-  color: #91add0;
-  font-size: 11px;
+
+/* =========================================================
+   دکمه‌ها
+   ========================================================= */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
 }
-footer {
+
+.btn {
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 12px 26px;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.btn:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.22); }
+.btn:active { transform: scale(0.96); }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+.btn--accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #1b2a4a;
+  border: none;
+  box-shadow: 0 8px 24px rgba(255, 126, 182, 0.4);
+}
+.btn--accent:hover { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 12px 30px rgba(255, 126, 182, 0.55); }
+
+.btn[aria-pressed="true"] { background: rgba(255, 209, 102, 0.3); border-color: var(--accent); }
+
+/* =========================================================
+   پیام سورپرایز
+   ========================================================= */
+.surprise {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(5, 15, 40, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+.surprise.is-open { opacity: 1; visibility: visible; }
+
+.surprise__box {
+  max-width: 460px;
+  width: 100%;
   text-align: center;
-  color: #a3bbd9;
-  font-size: 12px;
-  padding: 28px 0 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+  padding: 32px 24px;
+  transform: scale(0.6);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
 }
-footer span { color: #87dfff; margin-right: 5px; }
+.surprise.is-open .surprise__box { transform: scale(1); opacity: 1; }
 
-@keyframes float {
-  from { transform: translate3d(0, -10px, 0) scale(1); }
-  to { transform: translate3d(18px, 25px, 0) scale(1.08); }
-}
-@keyframes card-enter {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.surprise__emoji { font-size: 3rem; margin-bottom: 8px; animation: bounce 1.6s ease-in-out infinite; }
+.surprise__title { font-size: 1.7rem; margin-bottom: 12px; color: var(--accent); }
+.surprise__text { line-height: 2; margin-bottom: 22px; color: var(--text-soft); }
 
-@media (max-width: 520px) {
-  .page { padding-top: 38px; }
-  .hero { margin-bottom: 26px; }
-  .glass-card { border-radius: 21px; }
-  .message-content { min-height: 180px; padding: 16px; }
-  .message-content p { font-size: 13px; line-height: 2.2; }
-  .video-frame video { aspect-ratio: 9 / 16; max-height: 65vh; }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
+/* =========================================================
+   ریسپانسیو
+   ========================================================= */
+@media (max-width: 600px) {
+  :root { --gap: 28px; --radius: 20px; }
+  .page { padding: 28px 14px 48px; }
+  .glass-card { padding: 18px; }
+  .btn { padding: 11px 20px; font-size: 0.95rem; }
+}
+
+/* احترام به کاربرانی که انیمیشن کم می‌خوان */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+  .balloon, .surprise__emoji { animation: none; }
 }
