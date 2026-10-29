@@ -1,88 +1,274 @@
-// افکت جشن: ذرات نورانی و کاغذرنگی ملایم
-// برای خاموش کردن افکت، مقدار CELEBRATION_ENABLED را false کن.
-const CELEBRATION_ENABLED = true;
+/* =========================================================
+   تنظیمات سریع
+   ========================================================= */
+const CONFIG = {
+  autoConfettiOnLoad: true,   // شلیک کاغذ رنگی هنگام باز شدن صفحه
+  balloons: true,             // بادکنک‌های شناور
+  balloonCount: 12,
+  starCount: 70,
+  mouseSparkles: true,        // جرقه دنبال ماوس
+  typingSpeed: 45,            // میلی‌ثانیه برای هر حرف
+};
 
-(() => {
-  if (!CELEBRATION_ENABLED) return;
+/* =========================================================
+   ستاره‌ها
+   ========================================================= */
+const starsBox = document.getElementById('stars');
+for (let i = 0; i < CONFIG.starCount; i++) {
+  const s = document.createElement('div');
+  const size = Math.random() * 2.5 + 1;
+  s.className = 'star';
+  s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${size}px;height:${size}px;--d:${2 + Math.random() * 4}s;animation-delay:${Math.random() * 4}s`;
+  starsBox.appendChild(s);
+}
 
-  const canvas = document.getElementById("celebration-canvas");
-  const ctx = canvas.getContext("2d");
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduceMotion) return;
+/* =========================================================
+   کاغذ رنگی (Confetti)
+   ========================================================= */
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+let W, H, pieces = [];
+const COLORS = ['#ffd36b', '#ff7eb6', '#8fd0ff', '#ffffff', '#a58bff', '#6dffb3', '#ff9a5c'];
 
-  let width = 0;
-  let height = 0;
-  let particles = [];
-  let animationId;
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+addEventListener('resize', resize);
+resize();
 
-  const colors = ["#8be3ff", "#d7f5ff", "#8da9ff", "#ffffff", "#66cfff"];
-
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(height * dpr);
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    particles = Array.from({ length: Math.min(75, Math.floor(width / 17)) }, () => makeParticle(true));
-  }
-
-  function makeParticle(randomY = false) {
-    return {
-      x: Math.random() * width,
-      y: randomY ? Math.random() * height : -10,
-      size: Math.random() * 3 + 1,
-      speedY: Math.random() * 0.65 + 0.25,
-      speedX: (Math.random() - 0.5) * 0.5,
-      alpha: Math.random() * 0.55 + 0.2,
-      phase: Math.random() * Math.PI * 2,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      confetti: Math.random() > 0.72,
-      rotation: Math.random() * Math.PI,
-      spin: (Math.random() - 0.5) * 0.025
-    };
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
-    for (const p of particles) {
-      p.y += p.speedY;
-      p.x += p.speedX + Math.sin(p.phase) * 0.25;
-      p.phase += 0.012;
-      p.rotation += p.spin;
-
-      ctx.save();
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
-
-      if (p.confetti) {
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.fillRect(-p.size / 2, -p.size, p.size, p.size * 2.2);
-      } else {
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      if (p.y > height + 12 || p.x < -12 || p.x > width + 12) {
-        Object.assign(p, makeParticle(false));
-      }
-    }
-    animationId = requestAnimationFrame(draw);
-  }
-
-  window.addEventListener("resize", resize);
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) cancelAnimationFrame(animationId);
-    else draw();
+function addPiece(x, y, vx, vy) {
+  pieces.push({
+    x, y, vx, vy,
+    size: Math.random() * 8 + 5,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    rot: Math.random() * Math.PI * 2,
+    vr: (Math.random() - 0.5) * 0.3,
+    shape: Math.random() < 0.3 ? 'circle' : 'rect',
+    life: 0,
   });
+}
 
-  resize();
-  draw();
-})();
+function burst(x, y, count = 120) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = Math.random() * 10 + 4;
+    addPiece(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 4);
+  }
+}
+
+function rain(duration = 3500) {
+  const end = performance.now() + duration;
+  (function drop() {
+    for (let i = 0; i < 6; i++) addPiece(Math.random() * W, -20, (Math.random() - 0.5) * 3, Math.random() * 3 + 2);
+    if (performance.now() < end) requestAnimationFrame(drop);
+  })();
+}
+
+function celebrate() {
+  burst(W * 0.2, H * 0.6, 100);
+  burst(W * 0.8, H * 0.6, 100);
+  setTimeout(() => burst(W * 0.5, H * 0.4, 160), 250);
+  rain();
+}
+
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  pieces = pieces.filter(p => p.y < H + 30 && p.life < 400);
+  for (const p of pieces) {
+    p.vy += 0.18;          // جاذبه
+    p.vx *= 0.99;
+    p.x += p.vx + Math.sin(p.life / 12) * 0.6;
+    p.y += p.vy;
+    p.rot += p.vr;
+    p.life++;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = Math.min(1, (400 - p.life) / 80);
+    if (p.shape === 'circle') {
+      ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    }
+    ctx.restore();
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* کلیک روی هر جای صفحه = انفجار کاغذ رنگی */
+addEventListener('click', (e) => {
+  if (e.target.closest('video, .btn')) return;
+  burst(e.clientX, e.clientY, 50);
+});
+
+/* =========================================================
+   بادکنک‌ها
+   ========================================================= */
+const balloonBox = document.getElementById('balloons');
+let balloonsOn = CONFIG.balloons;
+let balloonTimer = null;
+
+function spawnBalloon() {
+  const b = document.createElement('div');
+  const w = 45 + Math.random() * 45;
+  const c = COLORS[Math.floor(Math.random() * (COLORS.length - 1))];
+  b.className = 'balloon';
+  b.style.cssText = `left:${Math.random() * 95}%;--w:${w}px;--c:${c};--t:${11 + Math.random() * 9}s;--sx:${(Math.random() - 0.5) * 120}px`;
+  b.addEventListener('click', (e) => {          // ترکوندن بادکنک
+    e.stopPropagation();
+    const r = b.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 40);
+    b.remove();
+  });
+  b.addEventListener('animationend', () => b.remove());
+  balloonBox.appendChild(b);
+}
+
+function startBalloons() {
+  stopBalloons();
+  for (let i = 0; i < 5; i++) setTimeout(spawnBalloon, i * 400);
+  balloonTimer = setInterval(() => {
+    if (balloonBox.children.length < CONFIG.balloonCount) spawnBalloon();
+  }, 1400);
+}
+function stopBalloons() { clearInterval(balloonTimer); balloonTimer = null; }
+
+const btnBalloons = document.getElementById('btnBalloons');
+function syncBalloonBtn() { btnBalloons.classList.toggle('on', balloonsOn); }
+btnBalloons.addEventListener('click', () => {
+  balloonsOn = !balloonsOn;
+  if (balloonsOn) startBalloons();
+  else { stopBalloons(); balloonBox.innerHTML = ''; }
+  syncBalloonBtn();
+});
+if (balloonsOn) startBalloons();
+syncBalloonBtn();
+
+/* =========================================================
+   تایپ شدن متن
+   ========================================================= */
+const msg = document.getElementById('messageText');
+const fullText = msg.textContent.trim();
+let typeTimer = null;
+
+function typeText() {
+  clearTimeout(typeTimer);
+  msg.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  msg.appendChild(cursor);
+  let i = 0;
+  (function step() {
+    if (i < fullText.length) {
+      cursor.before(document.createTextNode(fullText[i++]));
+      msg.scrollTop = msg.scrollHeight;
+      typeTimer = setTimeout(step, CONFIG.typingSpeed);
+    } else {
+      setTimeout(() => cursor.remove(), 1500);
+    }
+  })();
+}
+
+function initMessage() {
+  if (msg.dataset.typewriter === 'true') {
+    // وقتی باکس دیده شد شروع به تایپ کن
+    msg.textContent = '';
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) { typeText(); io.disconnect(); }
+    }, { threshold: 0.4 });
+    io.observe(msg);
+  }
+}
+initMessage();
+document.getElementById('btnType').addEventListener('click', () => {
+  msg.textContent = fullText;
+  typeText();
+});
+
+/* =========================================================
+   ویدئو (نمایش پیام راهنما اگر فایل پیدا نشد)
+   ========================================================= */
+const video = document.getElementById('mainVideo');
+const placeholder = document.getElementById('videoPlaceholder');
+const source = video.querySelector('source');
+function showPlaceholder() { placeholder.classList.add('show'); }
+if (source) source.addEventListener('error', showPlaceholder);
+video.addEventListener('error', showPlaceholder);
+video.addEventListener('loadeddata', () => placeholder.classList.remove('show'));
+// وقتی ویدئو پخش شد، یه مقدار کاغذ رنگی بزن
+video.addEventListener('play', () => burst(W / 2, H / 2, 60), { once: true });
+
+/* =========================================================
+   موزیک
+   ========================================================= */
+const music = document.getElementById('bgMusic');
+const btnMusic = document.getElementById('btnMusic');
+let musicBroken = false;
+music.addEventListener('error', () => { musicBroken = true; btnMusic.style.display = 'none'; });
+btnMusic.addEventListener('click', () => {
+  if (musicBroken) return;
+  if (music.paused) { music.play().catch(() => {}); btnMusic.classList.add('on'); }
+  else { music.pause(); btnMusic.classList.remove('on'); }
+});
+// موقع پخش ویدئو موزیک متوقف بشه که با هم قاطی نشن
+video.addEventListener('play', () => { if (!music.paused) { music.pause(); btnMusic.classList.remove('on'); } });
+
+/* =========================================================
+   دکمه‌ها
+   ========================================================= */
+document.getElementById('btnConfetti').addEventListener('click', celebrate);
+document.getElementById('btnFull').addEventListener('click', () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
+
+/* =========================================================
+   حرکت سه‌بعدی باکس‌ها با ماوس (Tilt)
+   ========================================================= */
+document.querySelectorAll('.tilt').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    if (e.target.closest('video')) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(900px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg) translateZ(6px)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
+
+/* =========================================================
+   ظاهر شدن با اسکرول
+   ========================================================= */
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('visible'); revealObs.unobserve(en.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = `${i * 0.12}s`;
+  revealObs.observe(el);
+});
+
+/* =========================================================
+   جرقه‌های دنبال ماوس
+   ========================================================= */
+if (CONFIG.mouseSparkles && matchMedia('(pointer:fine)').matches) {
+  let last = 0;
+  addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (now - last < 45) return;
+    last = now;
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = e.clientX + 'px';
+    s.style.top = e.clientY + 'px';
+    s.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+    s.style.setProperty('--dx', (Math.random() - 0.5) * 50 + 'px');
+    s.style.setProperty('--dy', Math.random() * 50 + 10 + 'px');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 800);
+  });
+}
+
+/* =========================================================
+   شروع
+   ========================================================= */
+if (CONFIG.autoConfettiOnLoad) setTimeout(celebrate, 600);

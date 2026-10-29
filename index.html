@@ -3,60 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HPD SQI</title>
+  <title>تولدت مبارک</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-  <canvas id="celebration-canvas" aria-hidden="true"></canvas>
+
+  <!-- پس‌زمینه‌ی متحرک -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+  <div class="bg-glow glow-3"></div>
+  <div id="stars"></div>
+  <div id="balloons"></div>
+  <canvas id="confetti"></canvas>
 
   <main class="page">
+
+    <!-- ========== عنوان (اینجا رو عوض کن) ========== -->
     <header class="hero">
-      <div class="eyebrow"><span class="eyebrow-dot"></span> Happy Birthday SQI </div>
-      <h1>برای <span>تو</span> ✨</h1>
-      <p class="subtitle">بعضی لحظه‌ها ارزش این را دارند که برای همیشه نگه‌شان داریم.</p>
+      <h1 class="title" id="title">تولدت مبارک 🎉</h1>
+      <p class="subtitle">یه پیام ویژه فقط برای تو</p>
     </header>
 
-    <!-- متن دلخواهت را فقط داخل تگ p زیر جایگزین کن -->
-    <section class="glass-card message-card">
-      <div class="card-heading">
-        <span class="heading-icon">✉</span>
-        <div>
-          <h2>چند کلمه از ته دل</h2>
-          <p>حرف‌هایی که دوست دارم بدانی...</p>
-        </div>
+    <!-- ========== باکس متن (متنت رو بین تگ بنویس) ========== -->
+    <section class="card tilt reveal" id="messageCard">
+      <div class="card-head">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="card-label">پیام من</span>
       </div>
-      <div class="message-content">
-        <p>
-          اینجا متن دلخواهت را بنویس. می‌توانی این نوشته را به یک پیام تبریک،
-          یک خاطره‌ی قشنگ یا هر حرفی که دوست داری تبدیل کنی.
-          برای اضافه یا کم کردن متن، فقط همین بخش را در فایل HTML ویرایش کن.
-        </p>
+
+      <div class="message-text" id="messageText" data-typewriter="true">
+سلام به تو که امروز روز توئه!
+اینجا می‌تونی هر متنی که دوست داری بنویسی.
+هر خطی که بنویسی همین‌طور نمایش داده می‌شه.
+این باکس حدود هفت خط جا داره و اگه متن
+بلندتر بشه، خودش اسکرول می‌خوره.
+امیدوارم سالی پر از شادی و موفقیت داشته باشی.
+دوستت دارم! ❤️
       </div>
-      <div class="card-footer"><span>با کلی حس خوب</span><span class="sparkle">✦</span></div>
     </section>
 
-    <!-- نام فایل ویدئوت را در src قرار بده؛ مثلا videos/my-video.mp4 -->
-    <section class="glass-card video-card">
-      <div class="card-heading">
-        <span class="heading-icon">▶</span>
-        <div>
-          <h2>لحظه‌های ماندگار</h2>
-          <p>یک ویدئو برای مرور خاطره‌ها</p>
-        </div>
+    <!-- ========== باکس ویدئو (فایل ویدئوت رو اینجا بذار) ========== -->
+    <section class="card video-card tilt reveal" id="videoCard">
+      <div class="card-head">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="card-label">ویدئوی ویژه</span>
       </div>
-      <div class="video-frame">
-        <video controls playsinline preload="metadata" poster="">
+
+      <div class="video-wrap">
+        <!-- نام فایل ویدئو رو در src بنویس. مثلا: video.mp4 -->
+        <video id="mainVideo" controls playsinline preload="metadata" poster="">
           <source src="video.mp4" type="video/mp4" />
-          مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
         </video>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <span>🎬</span>
+          <p>فایل ویدئو رو با نام <b>video.mp4</b> کنار این فایل بذار</p>
+        </div>
       </div>
-      <p class="video-note">ویدئو با حفظ نسبت تصویر اصلی نمایش داده می‌شود.</p>
     </section>
 
-    <footer>ساخته‌شده با عشق و کمی جادو <span>✦</span></footer>
+    <!-- ========== دکمه‌های امکانات ========== -->
+    <nav class="toolbar reveal">
+      <button class="btn" id="btnConfetti">🎉 جشن بگیر</button>
+      <button class="btn" id="btnBalloons">🎈 بادکنک</button>
+      <button class="btn" id="btnType">✨ تایپ دوباره</button>
+      <button class="btn" id="btnMusic">🎵 موزیک</button>
+      <button class="btn" id="btnFull">⛶ تمام‌صفحه</button>
+    </nav>
+
+    <footer class="foot">با ❤️ ساخته شده</footer>
   </main>
+
+  <!-- موزیک پس‌زمینه (اختیاری): فایل music.mp3 رو کنار فایل‌ها بذار -->
+  <audio id="bgMusic" src="music.mp3" loop></audio>
 
   <script src="script.js"></script>
 </body>
